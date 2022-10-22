@@ -38,7 +38,7 @@ def compute_md5(file_path):
                 hash_md5.update(bytes_piece)
         return hash_md5.hexdigest()
     except PermissionError:
-        logging.error(f"Permission Error for file at {file_path}")
+        logging.error(f"Permission error for file at {file_path}")
 
 
 def sync_files(replica, source):
@@ -88,15 +88,14 @@ def delete_folder_if_absent_in_src(r, replica, source):
 
 
 def parse_data():
-    parser = argparse.ArgumentParser(prog="Python-File-Sync", description="Program that synchronises folders.")
-    parser.add_argument('source_dir', help="This should be  path to source folder.",
-                        type=str)
-    parser.add_argument('replica_dir', help="This should be  path to replica folder. If it doesn't exist it'll "
+    parser = argparse.ArgumentParser(prog="Python-File-Sync", description="Program that synchronizes folders.")
+    parser.add_argument('source_dir', help="The path to the source folder.", type=str)
+    parser.add_argument('replica_dir', help="The path to the replica folder. If it doesn't exist it'll "
                                             "be created.",
                         type=str)
-    parser.add_argument('log_dir', help="This should be  path to log folder. If it doesn't exist, it'll be created.",
+    parser.add_argument('log_dir', help="The path to the log folder. If it doesn't exist, it'll be created.",
                         type=str)
-    parser.add_argument('-ti', '--time_interval', dest="time_interval", help="This should be the synchronization "
+    parser.add_argument('-ti', '--time_interval', dest="time_interval", help="The synchronization "
                                                                              "period in seconds.", type=int, default=60)
     args = parser.parse_args()
     return args.source_dir, args.replica_dir, args.log_dir, args.time_interval
@@ -104,7 +103,7 @@ def parse_data():
 
 def check_src_path(path):
     if not os.path.exists(path):
-        logging.error(f"Error! There's no such directory here: {path}")
+        logging.error(f"Error - directory not found: {path}")
         exit()
 
 
@@ -113,7 +112,7 @@ def check_create_path(path):
         if not os.path.exists(path):
             os.makedirs(path)
     except FileNotFoundError:
-        logging.error(f"Error! There's no such directory here: {path}")
+        logging.error(f"Error - directory not found: {path}")
         exit()
 
 
@@ -135,10 +134,10 @@ if __name__ == "__main__":
     check_src_path(src)
     check_create_path(rep)
 
-    logging.info(f"Starting folder synchronization.\n "
-                 f"Source directory: {src}\n "
+    logging.info(f"Starting folder synchronization.\n"
+                 f"Source directory: {src}\n"
                  f"Replica directory: {rep}\n"
-                 f"Log directory: {logs}\n "
+                 f"Log directory: {logs}\n"
                  f"Synchronization period: every {interval} seconds.")
     while True:
         logging.info(f"Starting synchronization.")
