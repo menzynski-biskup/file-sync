@@ -131,15 +131,14 @@ if __name__ == "__main__":
         ]
     )
 
-    check_src_path(src)
-    check_create_path(rep)
-
     logging.info(f"Starting folder synchronization.\n"
                  f"Source directory: {src}\n"
                  f"Replica directory: {rep}\n"
                  f"Log directory: {logs}\n"
                  f"Synchronization period: every {interval} seconds.")
     while True:
+        check_src_path(src)
+        check_create_path(rep)
         logging.info(f"Starting synchronization.")
         sync_folders(src, rep)
         logging.info("Synchronization ended.")
