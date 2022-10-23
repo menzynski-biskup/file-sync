@@ -6,6 +6,13 @@ import shutil
 from time import sleep
 
 
+# Function sync_folders that checks if files in source directory are the same as in replica
+# - if not it synchronizes changes and new files.
+# Then function checks if folders in source directory are the same as in replica
+# - if not it creates new folder in replica and moves to that directory,
+# where it repeats file synchronization and folder synchronization process.
+# Function also checks if folder in source directory was deleted and removes it from replica directory.
+
 def sync_folders(source, replica):
     if not files_are_equal(source, replica):
         sync_files(replica, source)
@@ -60,6 +67,10 @@ def delete_file(replica_path):
         logging.error(f"Permission denied. Can't delete file: {replica_path}.")
 
 
+# Check_copy function checks which file is new by comparing file names between source and replica.
+# Then it copies the missing files to replica directory.
+# It also checks file hashes to find files that was edited and copy them.
+
 def check_copy(source, replica):
     try:
         for file_name, file_hash in file_hashes(source).items():
@@ -88,15 +99,15 @@ def delete_folder_if_absent_in_src(r, replica, source):
 
 
 def parse_data():
-    parser = argparse.ArgumentParser(prog="Python-File-Sync", description="Program that synchronizes folders.")
+    parser = argparse.ArgumentParser(prog="Python-File-Sync",
+                                     description="Program that synchronizes folders.")
     parser.add_argument('source_dir', help="The path to the source folder.", type=str)
-    parser.add_argument('replica_dir', help="The path to the replica folder. If it doesn't exist it'll "
-                                            "be created.",
-                        type=str)
-    parser.add_argument('log_dir', help="The path to the log folder. If it doesn't exist, it'll be created.",
-                        type=str)
-    parser.add_argument('-ti', '--time_interval', dest="time_interval", help="The synchronization "
-                                                                             "period in seconds.", type=int, default=60)
+    parser.add_argument('replica_dir', help="The path to the replica folder. If it "
+                                            "doesn't exist it'll be created.", type=str)
+    parser.add_argument('log_dir', help="The path to the log folder. If it doesn't "
+                                        "exist, it'll be created.", type=str)
+    parser.add_argument('-ti', '--time_interval', dest="time_interval",
+                        help="The synchronization period in seconds.", type=int, default=60)
     args = parser.parse_args()
     return args.source_dir, args.replica_dir, args.log_dir, args.time_interval
 
