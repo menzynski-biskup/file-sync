@@ -41,7 +41,7 @@ class SyncFiles:
             logging.error(f"Permission error. Can't copy file at {self.source}.")
 
     def copy_file(self, file_name):
-        shutil.copy2(self.source + "\\" + file_name, self.replica)
+        shutil.copy2(str(self.source) + "\\" + file_name, self.replica)
 
 
 # Function sync_folders that checks if files in source directory are the same as in replica
@@ -58,7 +58,7 @@ def sync_folders(source, replica):
     for f in os.scandir(source):
         if f.is_dir():
             make_folder_if_absent(f, replica)
-            sync_folders(source + "\\" + f.name, replica + "\\" + f.name)
+            sync_folders(str(source) + "\\" + f.name, str(replica) + "\\" + f.name)
     for r in os.scandir(replica):
         if r.is_dir():
             delete_folder_if_absent_in_src(r, replica, source)
@@ -89,7 +89,7 @@ def compute_md5(file_path):
 
 def make_folder_if_absent(f, replica):
     if f.name not in [r.name for r in os.scandir(replica) if r.is_dir()]:
-        os.mkdir(replica + "\\" + f.name)
+        os.mkdir(str(replica) + "\\" + f.name)
 
 
 def delete_folder_if_absent_in_src(r, replica, source):
