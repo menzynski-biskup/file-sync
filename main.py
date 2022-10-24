@@ -6,6 +6,44 @@ import shutil
 from time import sleep
 
 
+class SyncFiles:
+
+    def __init__(self, source, replica):
+        self.source = source
+        self.replica = replica
+
+    def check_delete(self):
+        for file_name in file_hashes(self.replica):
+            if file_name not in file_hashes(self.source):
+                SyncFiles.delete_file(self.replica + "\\" + file_name)
+                logging.info(f"Deleted file: {file_name} form replica directory.")
+
+    def delete_file(self):
+        try:
+            os.remove(self.replica)
+        except PermissionError:
+            logging.error(f"Permission denied. Can't delete file: {self.replica}.")
+
+    # Check_copy function checks which file is new by comparing file names between source and replica.
+    # Then it copies the missing files to replica directory.
+    # It also checks file hashes to find files that was edited and copy them.
+
+    def check_copy(self):
+        try:
+            for file_name, file_hash in file_hashes(self.source).items():
+                if file_name not in file_hashes(self.replica):
+                    SyncFiles.copy_file(self, file_name)
+                    logging.info(f"Copied new file {file_name} from source directory.")
+                elif file_hash not in file_hashes(self.replica).values():
+                    SyncFiles.copy_file(self, file_name)
+                    logging.info(f"Updated file: {file_name} from source directory.")
+        except PermissionError:
+            logging.error(f"Permission error. Can't copy file at {self.source}.")
+
+    def copy_file(self, file_name):
+        shutil.copy2(self.source + "\\" + file_name, self.replica)
+
+
 # Function sync_folders that checks if files in source directory are the same as in replica
 # - if not it synchronizes changes and new files.
 # Then function checks if folders in source directory are the same as in replica
@@ -15,7 +53,8 @@ from time import sleep
 
 def sync_folders(source, replica):
     if not files_are_equal(source, replica):
-        sync_files(replica, source)
+        SyncFiles(source, replica).check_copy()
+        SyncFiles(source, replica).check_delete()
     for f in os.scandir(source):
         if f.is_dir():
             make_folder_if_absent(f, replica)
@@ -46,46 +85,6 @@ def compute_md5(file_path):
         return hash_md5.hexdigest()
     except PermissionError:
         logging.error(f"Permission error for file at {file_path}")
-
-
-def sync_files(replica, source):
-    check_delete(source, replica)
-    check_copy(source, replica)
-
-
-def check_delete(source, replica):
-    for file_name in file_hashes(replica):
-        if file_name not in file_hashes(source):
-            delete_file(replica + "\\" + file_name)
-            logging.info(f"Deleted file: {file_name} form replica directory.")
-
-
-def delete_file(replica_path):
-    try:
-        os.remove(replica_path)
-    except PermissionError:
-        logging.error(f"Permission denied. Can't delete file: {replica_path}.")
-
-
-# Check_copy function checks which file is new by comparing file names between source and replica.
-# Then it copies the missing files to replica directory.
-# It also checks file hashes to find files that was edited and copy them.
-
-def check_copy(source, replica):
-    try:
-        for file_name, file_hash in file_hashes(source).items():
-            if file_name not in file_hashes(replica):
-                copy_file(file_name, replica, source)
-                logging.info(f"Copied new file {file_name} from source directory.")
-            elif file_hash not in file_hashes(replica).values():
-                copy_file(file_name, replica, source)
-                logging.info(f"Updated file: {file_name} from source directory.")
-    except PermissionError:
-        logging.error(f"Permission error. Can't copy file at {source}.")
-
-
-def copy_file(file_name, replica, source):
-    shutil.copy2(source + "\\" + file_name, replica)
 
 
 def make_folder_if_absent(f, replica):
