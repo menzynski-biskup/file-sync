@@ -19,7 +19,7 @@ def sync_folders(source, replica):
     for f in os.scandir(source):
         if f.is_dir():
             make_folder_if_absent(f, replica)
-            sync_folders(source + "\\" + f.name, replica + "\\" + f.name)
+            sync_folders(str(source) + "\\" + f.name, str(replica) + "\\" + f.name)
     for r in os.scandir(replica):
         if r.is_dir():
             delete_folder_if_absent_in_src(r, replica, source)
@@ -56,7 +56,7 @@ def sync_files(replica, source):
 def check_delete(source, replica):
     for file_name in file_hashes(replica):
         if file_name not in file_hashes(source):
-            delete_file(replica + "\\" + file_name)
+            delete_file(str(replica) + "\\" + file_name)
             logging.info(f"Deleted file: {file_name} form replica directory.")
 
 
@@ -85,17 +85,17 @@ def check_copy(source, replica):
 
 
 def copy_file(file_name, replica, source):
-    shutil.copy2(source + "\\" + file_name, replica)
+    shutil.copy2(str(source) + "\\" + file_name, replica)
 
 
 def make_folder_if_absent(f, replica):
     if f.name not in [r.name for r in os.scandir(replica) if r.is_dir()]:
-        os.mkdir(replica + "\\" + f.name)
+        os.mkdir(str(replica) + "\\" + f.name)
 
 
 def delete_folder_if_absent_in_src(r, replica, source):
     if r.name not in [f.name for f in os.scandir(source) if f.is_dir()]:
-        shutil.rmtree(replica + "\\" + r.name)
+        shutil.rmtree(str(replica) + "\\" + r.name)
 
 
 def parse_data():
@@ -137,7 +137,7 @@ if __name__ == "__main__":
         level=logging.DEBUG,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
-            logging.FileHandler(logs + "\\" + "logs.txt"),
+            logging.FileHandler(str(logs) + "\\" + "logs.txt"),
             logging.StreamHandler()
         ]
     )
